@@ -34,11 +34,11 @@ def main():
         except Exception as exc:
             errors.append(f"{path}: {exc}")
     if errors or not files:
-        raise SystemExit("Snapshot validation failed:\\n" + "\\n".join(errors or ["no JSON files"]))
+        raise SystemExit("Snapshot validation failed:\n" + "\n".join(errors or ["no JSON files"]))
     manifest = Path(args.manifest)
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(json.dumps({"schema_version": 1, "symbols": len(files), "files": files},
-                                   indent=2, sort_keys=True) + "\\n")
+                                   indent=2, sort_keys=True) + "\n")
     print(f"Validated {len(files)} files and wrote {manifest}")
 
 if __name__ == "__main__":
