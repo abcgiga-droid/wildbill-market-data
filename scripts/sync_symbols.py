@@ -7,11 +7,11 @@ import urllib.request
 from pathlib import Path
 
 DEFAULT_URL = "https://raw.githubusercontent.com/abcgiga-droid/wildbill-charts/main/app/markets.js"
-SYMBOL_RE = re.compile(r'"([A-Z0-9.\\-]{1,10})"')
+SYMBOL_RE = re.compile(r'"([A-Z0-9.\-]{1,10})"')
 
 def symbols_from_markets(text):
     symbols = set()
-    for match in re.finditer(r"priceSymbols:\\s*\\[([^]]*)\\]", text):
+    for match in re.finditer(r"priceSymbols:\s*\[([^\]]*)\]", text):
         symbols.update(SYMBOL_RE.findall(match.group(1)))
     return sorted(symbols)
 
@@ -28,7 +28,7 @@ def main():
         raise SystemExit("No priceSymbols found; refusing to publish an empty universe.")
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text("\\n".join(symbols) + "\\n", encoding="utf-8")
+    output.write_text("\n".join(symbols) + "\n", encoding="utf-8")
     print(f"Wrote {len(symbols)} symbols to {output}")
 
 if __name__ == "__main__":
