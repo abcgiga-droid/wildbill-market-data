@@ -118,7 +118,7 @@ def main():
     rate = (len(symbols) - len(failed)) / len(symbols)
     report = {"requested": len(symbols), "succeeded": len(symbols) - len(failed),
               "failed": failed, "success_rate": rate}
-    Path("build/fetch-report.json").write_text(json.dumps(report, indent=2) + "\\n")
+    Path("build/fetch-report.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))
     if rate < args.min_success_rate:
         raise SystemExit(f"success rate {rate:.1%} is below {args.min_success_rate:.1%}")
