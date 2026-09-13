@@ -64,8 +64,14 @@ jobs:
         env:
           RELEASE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
+          set -eu
+          : "${DEPLOY_HOST:?DEPLOY_HOST secret is empty or unset}"
+          : "${DEPLOY_USER:?DEPLOY_USER secret is empty or unset}"
+          : "${DEPLOY_PATH:?DEPLOY_PATH secret is empty or unset}"
+          SSH="ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes"
+          RSYNC_SSH="ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes"
           remote_release="$DEPLOY_PATH/releases/$RELEASE_ID"
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$remote_release'"
-          rsync -az --delete build/ "$DEPLOY_USER@$DEPLOY_HOST:$remote_release/"
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" \
+          $SSH "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$remote_release'"
+          rsync -az -e "$RSYNC_SSH" --delete build/ "$DEPLOY_USER@$DEPLOY_HOST:$remote_release/"
+          $SSH "$DEPLOY_USER@$DEPLOY_HOST" \
             "ln -s 'releases/$RELEASE_ID' '$DEPLOY_PATH/current.next' && mv -Tf '$DEPLOY_PATH/current.next' '$DEPLOY_PATH/current'"
