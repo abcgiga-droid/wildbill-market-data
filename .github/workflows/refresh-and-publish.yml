@@ -22,17 +22,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_HOST: \${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: \${{ secrets.DEPLOY_USER }}
+      DEPLOY_PATH: \${{ secrets.DEPLOY_PATH }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-
       - run: pip install -r requirements.txt
       - run: python scripts/sync_symbols.py
 
@@ -40,9 +38,9 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s' "\${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "\${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
       - name: Restore current snapshot as merge input
         run: |
@@ -53,18 +51,18 @@ jobs:
       - name: Build and validate snapshot
         run: |
           args="--previous-dir previous/data"
-          if [ "${{ github.event.inputs.daily_only }}" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "\${{ github.event.inputs.daily_only }}" = "true" ] || [ "\${{ github.event_name }}" = "schedule" ]; then
             args="$args --daily-only"
           fi
-          if [ -n "${{ github.event.inputs.symbol_limit }}" ]; then
-            args="$args --limit ${{ github.event.inputs.symbol_limit }}"
+          if [ -n "\${{ github.event.inputs.symbol_limit }}" ]; then
+            args="$args --limit \${{ github.event.inputs.symbol_limit }}"
           fi
           python scripts/fetch_snapshot.py $args
           python scripts/validate_snapshot.py
 
       - name: Publish immutable release and atomically activate it
         env:
-          RELEASE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          RELEASE_ID: \${{ github.run_id }}-\${{ github.run_attempt }}
         run: |
           remote_release="$DEPLOY_PATH/releases/$RELEASE_ID"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$remote_release'"
