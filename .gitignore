@@ -1,0 +1,7 @@
+# Virtual environments and generated snapshots
+.venv/
+__pycache__/
+*.py[cod]
+build/
+previous/
+.env
